@@ -1,12 +1,136 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ISO Chatbot</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat ISO - Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat-container {
+      width: 400px;
+      max-width: 95%;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      border-bottom: 1px solid #ddd;
+    }
+    .chat-messages p {
+      margin: 8px 0;
+      padding: 8px;
+      border-radius: 6px;
+    }
+    .user {
+      background: #007bff;
+      color: white;
+      text-align: right;
+    }
+    .bot {
+      background: #e9ecef;
+      text-align: left;
+    }
+    form {
+      display: flex;
+      border-top: 1px solid #ddd;
+    }
+    input {
+      flex: 1;
+      border: none;
+      padding: 12px;
+      font-size: 16px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    select {
+      border: none;
+      padding: 8px;
+      font-size: 14px;
+      background: #f4f4f4;
+    }
+  </style>
 </head>
 <body>
-  <h1>🚀 Bienvenido a mi Chatbot ISO</h1>
-  <p>Puedes acceder a la API en <a href="/api/chat">/api/chat</a></p>
+  <div class="chat-container">
+    <div class="chat-messages" id="chat"></div>
+    <form id="chat-form">
+      <select id="provider">
+        <option value="openai">OpenAI</option>
+        <option value="gemini">Gemini</option>
+      </select>
+      <input type="text" id="message" placeholder="Escribe tu mensaje..." required />
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("message");
+    const providerSelect = document.getElementById("provider");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const message = input.value.trim();
+      const provider = providerSelect.value;
+      if (!message) return;
+
+      // Mostrar mensaje del usuario
+      const userMsg = document.createElement("p");
+      userMsg.className = "user";
+      userMsg.textContent = message;
+      chat.appendChild(userMsg);
+
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+
+      // Enviar al backend
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, provider }),
+        });
+
+        const data = await res.json();
+
+        const botMsg = document.createElement("p");
+        botMsg.className = "bot";
+        botMsg.textContent = data.reply || data.error || "Error al responder.";
+        chat.appendChild(botMsg);
+
+        chat.scrollTop = chat.scrollHeight;
+      } catch (err) {
+        const errorMsg = document.createElement("p");
+        errorMsg.className = "bot";
+        errorMsg.textContent = "❌ Error de conexión con el servidor.";
+        chat.appendChild(errorMsg);
+      }
+    });
+  </script>
 </body>
 </html>
