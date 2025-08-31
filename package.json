@@ -4,6 +4,6 @@
   "type": "module",
   "dependencies": {
     "openai": "^4.52.0",
-    "@google/genai": "^0.7.0"
+    "@google/generative-ai": "^0.7.0"
   }
 }
