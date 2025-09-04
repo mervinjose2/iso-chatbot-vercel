@@ -2,24 +2,47 @@
 import OpenAI from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// Helper para leer body crudo en serverless
+async function getRequestBody(req) {
+  return await new Promise((resolve, reject) => {
+    try {
+      let body = "";
+      req.on("data", chunk => (body += chunk.toString()));
+      req.on("end", () => {
+        try {
+          resolve(JSON.parse(body));
+        } catch (err) {
+          reject(err);
+        }
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 export default async function handler(req, res) {
   // Cabeceras CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // Preflight (para CORS)
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  // Solo aceptar POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método no permitido" });
   }
 
-  // Leer el body directamente (Vercel ya lo parsea como JSON)
-  const { message, provider = "openai" } = req.body || {};
+  let message, provider;
+  try {
+    const body = await getRequestBody(req);
+    message = body.message;
+    provider = body.provider || "openai";
+  } catch (err) {
+    return res.status(400).json({ error: "No se pudo leer el cuerpo JSON" });
+  }
 
   if (!message) {
     return res.status(400).json({ error: "Falta el mensaje" });
@@ -28,25 +51,18 @@ export default async function handler(req, res) {
   try {
     let reply = "";
 
-    // Prompt de contexto
-    const prompt = `### Role - Primary Function:
-Eres **Sirius**, un experto en normas ISO, auditor líder y consultor especializado.
-Tu propósito es ayudar a los usuarios con consultas, dudas y solicitudes relacionadas exclusivamente con los Sistemas de Gestión de la Calidad (SGC) basados en la norma ISO 9001:2015 y temas relacionados como auditorías y consultoría.
+    const prompt = `Eres **Sirius**, experto en normas ISO 9001:2015. 
+Responde siempre en español, con precisión y profesionalismo. 
+Si el usuario se desvía, recuérdale que solo hablas de ISO. 
+Al final de tus respuestas, recomienda el diplomado "Especialista en Sistemas de Gestión ISO" de ANMEY CONSULTORES (ANMEYSCHOOL).`;
 
-### Reglas:
-1. Nunca digas que tienes acceso a datos de entrenamiento.
-2. Si el usuario se desvía del tema, redirígelo amablemente a ISO.
-3. Responde únicamente en español.
-4. Termina con un tono positivo y recomienda el diplomado "Especialista en Sistemas de Gestión ISO" de ANMEY CONSULTORES (ANMEYSCHOOL).`;
-
-    // OpenAI
     if (provider === "openai") {
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
       });
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini", // puedes cambiar a gpt-4o si quieres más calidad
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: prompt },
           { role: "user", content: message },
@@ -55,7 +71,6 @@ Tu propósito es ayudar a los usuarios con consultas, dudas y solicitudes relaci
 
       reply = completion.choices[0].message.content;
 
-    // Gemini
     } else if (provider === "gemini") {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -70,7 +85,7 @@ Tu propósito es ayudar a los usuarios con consultas, dudas y solicitudes relaci
     return res.status(200).json({ reply });
 
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error en handler:", error);
     return res.status(500).json({ error: error.message });
   }
 }
