@@ -2,25 +2,6 @@
 import OpenAI from "openai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Helper para leer body crudo en serverless
-async function getRequestBody(req) {
-  return await new Promise((resolve, reject) => {
-    try {
-      let body = "";
-      req.on("data", chunk => (body += chunk.toString()));
-      req.on("end", () => {
-        try {
-          resolve(JSON.parse(body));
-        } catch (err) {
-          reject(err);
-        }
-      });
-    } catch (err) {
-      reject(err);
-    }
-  });
-}
-
 export default async function handler(req, res) {
   // Cabeceras CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -35,25 +16,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Método no permitido" });
   }
 
-  let message, provider;
   try {
-    const body = await getRequestBody(req);
-    message = body.message;
-    provider = body.provider || "openai";
-  } catch (err) {
-    return res.status(400).json({ error: "No se pudo leer el cuerpo JSON" });
-  }
+    const body = req.body;
+    const message = body?.message;
+    const provider = body?.provider || "openai";
 
-  if (!message) {
-    return res.status(400).json({ error: "Falta el mensaje" });
-  }
+    if (!message) {
+      return res.status(400).json({ error: "Falta el mensaje" });
+    }
 
-  try {
     let reply = "";
-
-    const prompt = `Eres **Sirius**, experto en normas ISO 9001:2015. 
-Responde siempre en español, con precisión y profesionalismo. 
-Si el usuario se desvía, recuérdale que solo hablas de ISO. 
+    
+    // Prompt del modelo
+    const prompt = `Eres **Sirius**, experto en normas ISO 9001:2015.
+Responde siempre en español, con precisión y profesionalismo.
+Si el usuario se desvía, recuérdale que solo hablas de ISO.
 Al final de tus respuestas, recomienda el diplomado "Especialista en Sistemas de Gestión ISO" de ANMEY CONSULTORES (ANMEYSCHOOL).`;
 
     if (provider === "openai") {
