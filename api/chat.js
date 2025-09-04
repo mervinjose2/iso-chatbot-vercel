@@ -1,6 +1,21 @@
 // api/chat.js
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// Helper para leer el body como texto sin procesar
+async function getRawBody(req) {
+  return await new Promise((resolve, reject) => {
+    try {
+      let body = "";
+      req.on("data", chunk => (body += chunk.toString()));
+      req.on("end", () => {
+        resolve(body);
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 export default async function handler(req, res) {
   // Cabeceras CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -16,8 +31,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = req.body;
-    const message = body?.message;
+    const message = await getRawBody(req);
 
     if (!message) {
       return res.status(400).json({ error: "Falta el mensaje" });
