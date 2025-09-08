@@ -1,6 +1,5 @@
 // api/chat.js
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { readFileSync } from 'fs';
 
 export default async function handler(req, res) {
     // Cabeceras CORS
@@ -24,8 +23,30 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: "Falta el mensaje" });
         }
 
-        // Lee el contenido del archivo diplomado.txt para usarlo como contexto
-        const diplomadoInfo = readFileSync('./api/diplomado.txt', 'utf8');
+        // Información del diplomado y servicios integrada directamente en el código
+        const diplomadoInfo = `ANMEY CONSULTORES
+
+SERVICIOS CLAVE:
+- AUDITORÍAS: Evaluaciones de sistemas de gestión ISO, productos, procesos, cumplimiento y auditorías internas/a proveedores. Nos enfocamos en mejorar la eficiencia y la confiabilidad.
+- CONSULTORÍA: Asesoría especializada para la implementación de Sistemas de Gestión ISO. Ayudamos a las empresas a resolver problemas y alcanzar sus objetivos.
+- FORMACIÓN (ANMEYSCHOOL): Capacitación profesional en línea con metodologías B-Learning (clases en vivo y actividades en campus virtual).
+- Cursos INCOMPANY y Personalizados: Programas adaptados a las necesidades específicas de empresas.
+
+DIPLOMADO: ESPECIALISTA EN SISTEMAS DE GESTIÓN ISO
+
+- OBJETIVO: Capacitar a profesionales para ser expertos de alto nivel en normas ISO, mejorando su perfil laboral y su demanda.
+- PROGRAMA: Compuesto por 20 módulos teórico-prácticos.
+- DURACIÓN TOTAL: 200 horas.
+- MODALIDAD: B-learning (asincrónico 100% online) y clases en vivo por Zoom (2 horas semanales).
+- FLEXIBILIDAD: Los módulos se pueden tomar de forma independiente o como parte del programa completo.
+- AUDIENCIA: Profesionales apasionados por la excelencia y la mejora continua.
+- RECURSOS: Campus virtual, video conferencias en vivo, atención personalizada en grupos de chat.
+
+INFORMACIÓN DE CONTACTO:
+- Instagram: https://www.instagram.com/anmeyconsultores/
+- LinkedIn: https://www.linkedin.com/in/anmey-consultores-396142203/
+- WhatsApp: https://api.whatsapp.com/send/?phone=584123694115&text&type=phone_number&app_absent=0
+- Página web: https://anmey.net/formacion/programa-modular-especialistas-en-sistemas-de-gestion-iso/`;
 
         // Nuevo prompt con instrucciones y el contexto del diplomado
         const prompt = `Eres **Sirius**, un experto en normas ISO. Tu conocimiento se especializa en las siguientes normas: ISO 9001 (Calidad), ISO 14001 (Gestión Ambiental), ISO 45001 (Salud y Seguridad Laboral), ISO 27001 (Seguridad de la Información), ISO 50001 (Gestión de la Energía), ISO 22301 (Continuidad del Negocio), la ISO 22000 (Seguridad Alimentaria), la ISO 19011 (Auditoría de Sistemas de Gestión) y la ISO 31000 (Gestión del riesgo).
