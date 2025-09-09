@@ -49,8 +49,8 @@ SERVICIOS CLAVE:
 DIPLOMADO: ESPECIALISTA EN SISTEMAS DE GESTIÓN ISO
 
 - OBJETIVO: Capacitar a profesionales para ser expertos de alto nivel en normas ISO, mejorando su perfil laboral y su demanda.
-- PROGRAMA: Compuesto por 20 módulos teórico-prácticos.
-- DURACIÓN TOTAL: 200 horas.
+- PROGRAMA: Compuesto por 12 módulos teórico-prácticos.
+- DURACIÓN TOTAL: 160 horas.
 - MODALIDAD: B-learning (asincrónico 100% online) y clases en vivo por Zoom (2 horas semanales).
 - FLEXIBILIDAD: Los módulos se pueden tomar de forma independiente o como parte del programa completo.
 - AUDIENCIA: Profesionales apasionados por la excelencia y la mejora continua.
